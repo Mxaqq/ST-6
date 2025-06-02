@@ -1,88 +1,76 @@
 package com.mycompany.app;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.ArrayList;
 
-public class GameTest {
-    
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import static org.junit.jupiter.api.Assertions.*;
+
+class GameTest {
+    private Game game;
+
+    @BeforeEach
+    void setUp() {
+        game = new Game();
+        game.symbol = 'X';
+    }
+
     @Test
-    public void testGameInitialization() {
-        Game game = new Game();
-        
+    void testInitialState() {
         assertEquals(State.PLAYING, game.state);
         assertNotNull(game.player1);
         assertNotNull(game.player2);
-        assertEquals(9, game.board.length);
-        
-        for(char c : game.board) {
-            assertEquals(' ', c);
+        assertEquals('X', game.player1.symbol);
+        assertEquals('O', game.player2.symbol);
+
+        char[] expected = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+        assertArrayEquals(expected, game.board);
+    }
+
+    @Test
+    void testCheckStateAllWinConditions() {
+        // Проверяем все возможные выигрышные комбинации
+        char[][] winningBoards = {
+                {'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', 'X', 'X', 'X', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X'},
+                {'X', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' '},
+                {' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X', ' '},
+                {' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X'},
+                {'X', ' ', ' ', ' ', 'X', ' ', ' ', ' ', 'X'},
+                {' ', ' ', 'X', ' ', 'X', ' ', 'X', ' ', ' '}
+        };
+
+        for (char[] board : winningBoards) {
+            game.board = board;
+            assertEquals(State.XWIN, game.checkState(board));
         }
     }
-    
+
     @Test
-    public void testCheckStateXWin() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'X', 'X',
-            ' ', ' ', ' ',
-            ' ', ' ', ' '
-        };
-        game.symbol = 'X';
-        
-        assertEquals(State.XWIN, game.checkState(board));
-    }
-    
-    @Test
-    public void testCheckStateOWin() {
-        Game game = new Game();
-        char[] board = {
-            'O', ' ', ' ',
-            'O', ' ', ' ',
-            'O', ' ', ' '
-        };
+    void testCheckStateOWin() {
         game.symbol = 'O';
-        
+        char[] board = {'O', 'O', 'O', ' ', ' ', ' ', ' ', ' ', ' '};
         assertEquals(State.OWIN, game.checkState(board));
     }
-    
+
     @Test
-    public void testCheckStateDraw() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'O', 'X',
-            'X', 'O', 'O',
-            'O', 'X', 'X'
-        };
-        game.symbol = 'X';
-        
+    void testCheckStateDraw() {
+        char[] board = {'X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X'};
         assertEquals(State.DRAW, game.checkState(board));
     }
-    
+
     @Test
-    public void testCheckStatePlaying() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'O', 'X',
-            'X', ' ', 'O',
-            'O', 'X', 'X'
-        };
-        game.symbol = 'X';
-        
+    void testCheckStatePlaying() {
+        char[] board = {'X', 'O', 'X', 'X', ' ', 'O', 'O', 'X', 'X'};
         assertEquals(State.PLAYING, game.checkState(board));
     }
-    
+
     @Test
-    public void testGenerateMoves() {
-        Game game = new Game();
-        char[] board = {
-            'X', ' ', ' ',
-            ' ', 'O', ' ',
-            ' ', ' ', 'X'
-        };
+    void testGenerateMoves() {
+        char[] board = {'X', ' ', ' ', ' ', 'O', ' ', ' ', ' ', 'X'};
         ArrayList<Integer> moves = new ArrayList<>();
-        
         game.generateMoves(board, moves);
-        
+
         assertEquals(6, moves.size());
         assertTrue(moves.contains(1));
         assertTrue(moves.contains(2));
@@ -91,76 +79,47 @@ public class GameTest {
         assertTrue(moves.contains(6));
         assertTrue(moves.contains(7));
     }
-    
+
     @Test
-    public void testEvaluatePositionXWin() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'X', 'X',
-            ' ', ' ', ' ',
-            ' ', ' ', ' '
-        };
-        game.symbol = 'X';
-        
-        assertEquals(Game.INF, game.evaluatePosition(board, game.player1));
-        assertEquals(-Game.INF, game.evaluatePosition(board, game.player2));
-    }
-    
-    @Test
-    public void testEvaluatePositionOWin() {
-        Game game = new Game();
-        char[] board = {
-            'O', ' ', ' ',
-            'O', ' ', ' ',
-            'O', ' ', ' '
-        };
+    void testEvaluatePosition() {
+        // X выигрывает
+        char[] xWinBoard = {'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' '};
+        assertEquals(Game.INF, game.evaluatePosition(xWinBoard, game.player1));
+        assertEquals(-Game.INF, game.evaluatePosition(xWinBoard, game.player2));
+
+        // O выигрывает
+        char[] oWinBoard = {'O', 'O', 'O', ' ', ' ', ' ', ' ', ' ', ' '};
         game.symbol = 'O';
-        
-        assertEquals(Game.INF, game.evaluatePosition(board, game.player2));
-        assertEquals(-Game.INF, game.evaluatePosition(board, game.player1));
+        assertEquals(Game.INF, game.evaluatePosition(oWinBoard, game.player2));
+        assertEquals(-Game.INF, game.evaluatePosition(oWinBoard, game.player1));
+
+        // Ничья
+        char[] drawBoard = {'X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X'};
+        assertEquals(0, game.evaluatePosition(drawBoard, game.player1));
+        assertEquals(0, game.evaluatePosition(drawBoard, game.player2));
+
+        // Игра продолжается
+        char[] playingBoard = {'X', 'O', 'X', 'X', ' ', 'O', 'O', 'X', 'X'};
+        assertEquals(-1, game.evaluatePosition(playingBoard, game.player1));
+        assertEquals(-1, game.evaluatePosition(playingBoard, game.player2));
     }
-    
+
     @Test
-    public void testEvaluatePositionDraw() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'O', 'X',
-            'X', 'O', 'O',
-            'O', 'X', 'X'
-        };
-        game.symbol = 'X';
-        
-        assertEquals(0, game.evaluatePosition(board, game.player1));
-        assertEquals(0, game.evaluatePosition(board, game.player2));
-    }
-    
-    @Test
-    public void testEvaluatePositionPlaying() {
-        Game game = new Game();
-        char[] board = {
-            'X', 'O', 'X',
-            'X', ' ', 'O',
-            'O', 'X', 'X'
-        };
-        game.symbol = 'X';
-        
-        assertEquals(-1, game.evaluatePosition(board, game.player1));
-        assertEquals(-1, game.evaluatePosition(board, game.player2));
-    }
-    
-    
-    @Test
-    public void testMiniMaxWinsWhenPossible() {
-        Game game = new Game();
-        char[] board = {
-            'O', 'O', ' ',
-            'X', 'X', ' ',
-            ' ', ' ', ' '
-        };
+    void testMiniMaxBlocksOpponentWin() {
+        char[] board = {'O', 'O', ' ', 'X', 'X', ' ', ' ', ' ', ' '};
         game.board = board.clone();
-        
+        game.symbol = 'O';
+
         int bestMove = game.MiniMax(board, game.player2);
-        
-        assertEquals(3, bestMove); // Должен завершить победу O в позиции 3 (индекс 2)
+        assertEquals(3, bestMove);
+    }
+
+    @Test
+    void testMiniMaxTakesWinWhenAvailable() {
+        char[] board = {'X', 'X', ' ', 'O', 'O', ' ', ' ', ' ', ' '};
+        game.board = board.clone();
+
+        int bestMove = game.MiniMax(board, game.player1);
+        assertEquals(3, bestMove);
     }
 }

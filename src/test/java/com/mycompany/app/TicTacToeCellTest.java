@@ -1,35 +1,37 @@
 package com.mycompany.app;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TicTacToeCellTest {
-    
+class TicTacToeCellTest {
+    private TicTacToeCell cell;
+
+    @BeforeEach
+    void setUp() {
+        cell = new TicTacToeCell(1, 0, 0);
+    }
+
     @Test
-    public void testCellInitialization() {
-        TicTacToeCell cell = new TicTacToeCell(0, 0, 0);
-        
+    void testInitialState() {
         assertEquals(' ', cell.getMarker());
-        assertEquals(0, cell.getNum());
+        assertEquals(1, cell.getNum());
         assertEquals(0, cell.getRow());
         assertEquals(0, cell.getCol());
         assertTrue(cell.isEnabled());
     }
-    
+
     @Test
-    public void testSetMarker() {
-        TicTacToeCell cell = new TicTacToeCell(0, 0, 0);
+    void testSetMarker() {
         cell.setMarker("X");
-        
         assertEquals('X', cell.getMarker());
         assertFalse(cell.isEnabled());
     }
-    
+
     @Test
-    public void testCellProperties() {
-        TicTacToeCell cell = new TicTacToeCell(5, 2, 1);
-        
-        assertEquals(5, cell.getNum());
-        assertEquals(1, cell.getRow());
-        assertEquals(2, cell.getCol());
+    void testCellProperties() {
+        TicTacToeCell customCell = new TicTacToeCell(5, 2, 1);
+        assertEquals(5, customCell.getNum());
+        assertEquals(1, customCell.getRow());
+        assertEquals(2, customCell.getCol());
     }
 }

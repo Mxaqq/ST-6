@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TicTacToePanelTest {
     private TicTacToePanel panel;
@@ -22,30 +21,42 @@ class TicTacToePanelTest {
             assertNotNull(cell);
             assertEquals(' ', cell.getMarker());
         }
-    }
-
-    @Test
-    void testActionPerformedPlayerMove() {
-        ActionEvent event = new ActionEvent(panel.cells[0], ActionEvent.ACTION_PERFORMED, null);
-        panel.actionPerformed(event);
-
-        assertEquals('X', panel.cells[0].getMarker());
-
         assertEquals(panel.game.player1, panel.game.cplayer);
     }
 
     @Test
-    void testActionPerformedPlayer2Move() {
-        ActionEvent event = new ActionEvent(panel.cells[0], ActionEvent.ACTION_PERFORMED, null);
-        panel.actionPerformed(event);
-
-        assertEquals('X', panel.cells[0].getMarker(), "First cell should have player's marker 'X'");
-
-        int player2Move = panel.game.player2.move;
-        if (player2Move > 0) {
-            panel.cells[player2Move - 1].doClick();
-            assertEquals('O', panel.cells[player2Move - 1].getMarker(), "Player 2 should mark their move in the corresponding cell");
-        }
+    void testPlayerMove() {
+        panel.cells[0].doClick();
+        assertEquals('X', panel.cells[0].getMarker());
+        assertFalse(panel.cells[0].isEnabled());
     }
 
+    @Test
+    void testAIMoveAfterPlayer() {
+        panel.cells[0].doClick(); // Ход игрока
+        boolean aiMoved = false;
+
+        for (int i = 1; i < 9; i++) {
+            if (panel.cells[i].getMarker() == 'O') {
+                aiMoved = true;
+                break;
+            }
+        }
+
+        assertTrue(aiMoved, "AI должен был сделать ход после игрока");
+    }
+
+    @Test
+    void testGameEndDetection() {
+        // Имитируем выигрышную ситуацию
+        panel.cells[0].setMarker("X");
+        panel.cells[1].setMarker("X");
+        panel.cells[2].setMarker("X");
+
+        panel.game.board = new char[] {'X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' '};
+        panel.game.symbol = 'X';
+        panel.game.state = panel.game.checkState(panel.game.board);
+
+        assertEquals(State.XWIN, panel.game.state);
+    }
 }

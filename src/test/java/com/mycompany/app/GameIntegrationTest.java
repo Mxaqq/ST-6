@@ -7,21 +7,17 @@ public class GameIntegrationTest {
     @Test
     public void testGameFlow() {
         Game game = new Game();
-        
-        // Первый ход X (игрок)
+
         game.cplayer = game.player1;
         game.board[0] = 'X';
         game.symbol = 'X';
-        
-        // Проверяем состояние
+
         assertEquals(State.PLAYING, game.checkState(game.board));
-        
-        // AI делает ход O
+
         game.cplayer = game.player2;
         int move = game.MiniMax(game.board, game.player2);
         assertTrue(move > 0 && move <= 9);
-        
-        // Проверяем, что AI выбрал центр (лучший первый ход)
+
         assertEquals(5, move);
     }
     
