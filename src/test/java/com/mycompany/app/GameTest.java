@@ -122,4 +122,38 @@ class GameTest {
         int bestMove = game.MiniMax(board, game.player1);
         assertEquals(3, bestMove);
     }
+
+    @Test
+    void testGameConstructorInitialization() {
+        assertEquals(State.PLAYING, game.state);
+        assertEquals('X', game.player1.symbol);
+        assertEquals('O', game.player2.symbol);
+        assertArrayEquals(new char[]{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}, game.board);
+    }
+
+    @Test
+    void testMinMoveWithDirectWin() {
+        char[] board = {
+                'O', 'O', ' ',
+                'X', 'X', ' ',
+                ' ', ' ', ' '
+        };
+        game.board = board;
+        game.symbol = 'O';
+        int score = game.MinMove(board, game.player2);
+        assertEquals(-Game.INF, score); // O может выиграть, поэтому минимальная оценка для X
+    }
+
+    @Test
+    void testMaxMoveWithDirectLoss() {
+        char[] board = {
+                'X', 'X', ' ',
+                'O', 'O', ' ',
+                ' ', ' ', ' '
+        };
+        game.board = board;
+        game.symbol = 'X';
+        int score = game.MaxMove(board, game.player1);
+        assertEquals(Game.INF, score); // X может выиграть
+    }
 }
